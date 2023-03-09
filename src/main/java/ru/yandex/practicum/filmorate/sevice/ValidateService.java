@@ -1,0 +1,39 @@
+package ru.yandex.practicum.filmorate.sevice;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+
+import java.time.LocalDate;
+
+@Component
+@Slf4j
+public class ValidateService {
+
+    public void validateFilm(Film film) {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            log.warn("Дата выхода фильма слишком ранняя: {}", film.getReleaseDate());
+            throw new ValidationException("Проверьте дату выхода фильма.");
+        }
+        if (film.getDuration() <= 0) {
+            log.warn("Продолжительность фильма 0 или меньше минут: {}", film.getDuration());
+            throw new ValidationException("Проверьте продолжительность фильма");
+        }
+    }
+
+    public void validateUser(User user) {
+        if (null == user.getName() || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        if (user.getLogin().isEmpty()) {
+            log.warn("Логин пользователя пуст: {}", user.getLogin());
+            throw new ValidationException("Логин пользователя пуст.");
+        }
+        if (user.getLogin().contains(" ")) {
+            log.warn("Логин пользователя содержит пробел(ы): {}", user.getLogin());
+            throw new ValidationException("Логин пользователя содержит пробел(ы).");
+        }
+    }
+}
