@@ -1,18 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.Test;
-
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.sevice.ValidateService;
 
-import java.time.Duration;
-import java.time.LocalDate;
+import javax.validation.*;
+import java.time.*;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +26,7 @@ public class ValidateServiceTest {
         film.setName("");
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(1, violations.size(), "Есть возможность создать фильм с пустым названием.");
-        }
+    }
 
     @Test
     void filmDescriptionShouldNotBeMoreThan200() {
