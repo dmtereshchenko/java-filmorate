@@ -11,7 +11,7 @@ import java.util.*;
 @Slf4j
 public class UserStorage {
 
-    private HashMap<Integer, User> users = new HashMap<>();
+    private final HashMap<Integer, User> users = new HashMap<>();
     private static int userId;
 
     public int generateId() {

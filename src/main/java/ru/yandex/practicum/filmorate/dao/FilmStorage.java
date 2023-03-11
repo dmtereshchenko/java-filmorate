@@ -11,7 +11,7 @@ import java.util.*;
 @Slf4j
 public class FilmStorage {
 
-    private HashMap<Integer, Film> films = new HashMap<>();
+    private final HashMap<Integer, Film> films = new HashMap<>();
     private static int filmId;
 
     public int generateId() {

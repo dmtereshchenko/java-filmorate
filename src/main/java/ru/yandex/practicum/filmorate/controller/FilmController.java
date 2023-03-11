@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 
@@ -15,8 +14,8 @@ import java.util.List;
 @Slf4j
 public class FilmController {
 
-    ValidateService validator = new ValidateService();
-    FilmStorage storage = new FilmStorage();
+    private final ValidateService validator = new ValidateService();
+    private final FilmStorage storage = new FilmStorage();
 
     @GetMapping("/films")
     public List<Film> findAll() {
@@ -24,7 +23,7 @@ public class FilmController {
     }
 
     @PostMapping(value = "/films")
-    public Film create(@Valid @RequestBody Film film, HttpServletRequest request) throws ValidationException {
+    public Film create(@Valid @RequestBody Film film, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
         validator.validateFilm(film);
         storage.addFilm(film);
@@ -32,7 +31,7 @@ public class FilmController {
     }
 
     @PutMapping(value = "/films")
-    public Film updateFilm(@RequestBody Film film, HttpServletRequest request) throws ValidationException {
+    public Film updateFilm(@RequestBody Film film, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
         validator.validateFilm(film);
         storage.filmExist(film);
