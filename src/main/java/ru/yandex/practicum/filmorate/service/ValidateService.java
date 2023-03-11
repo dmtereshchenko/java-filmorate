@@ -13,8 +13,10 @@ import java.time.LocalDate;
 @Slf4j
 public class ValidateService {
 
+    private static final LocalDate FILM_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+
     public void validateFilm(Film film) {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (film.getReleaseDate().isBefore(FILM_RELEASE_DATE)) {
             log.warn("Дата выхода фильма слишком ранняя: {}", film.getReleaseDate());
             throw new ValidationException("Проверьте дату выхода фильма.");
         }
