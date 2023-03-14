@@ -1,15 +1,17 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Component
 @Slf4j
-public class UserStorage {
+public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Integer, User> users = new HashMap<>();
     private static int userId;
@@ -40,5 +42,10 @@ public class UserStorage {
 
     public void updateUser(User user) {
         users.put(user.getId(), user);
+    }
+
+    @Override
+    public User getUserById(int id) {
+        return users.get(id);
     }
 }

@@ -1,15 +1,16 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Component
 @Slf4j
-public class FilmStorage {
+public class InMemoryFilmStorage implements FilmStorage {
 
     private final HashMap<Integer, Film> films = new HashMap<>();
     private static int filmId;
@@ -26,11 +27,11 @@ public class FilmStorage {
         return allFilms;
     }
 
-    public void filmExist(Film film) {
-        if (!films.containsKey(film.getId())) {
-            log.warn("Фильм с данным идентификатором отсутствует в базе: {}", film.getId());
-            throw new ValidationException("Фильм с данным идентификатором отсутствует в базе.");
+    public boolean filmExist(Film film) {
+        if (films.containsKey(film.getId())) {
+            return true;
         }
+        return false;
     }
 
     public void addFilm(Film film) {
@@ -40,5 +41,9 @@ public class FilmStorage {
 
     public void updateFilm(Film film) {
         films.put(film.getId(), film);
+    }
+
+    public Film getFilmById(int id) {
+        return films.get(id);
     }
 }
