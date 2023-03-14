@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -9,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,12 +19,14 @@ import java.util.List;
 public class FilmController {
 
     private final ValidateService validator = new ValidateService();
-    private final FilmStorage filmStorage = new InMemoryFilmStorage();
-    private final FilmService service = new FilmService(filmStorage);
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
+    private final FilmService service;
 
-    @Autowired
-    public FilmController(UserStorage storage) {
-        this.userStorage = storage;
+    public FilmController(FilmStorage filmStorage, UserStorage userStorage, FilmService filmService) {
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
+        this.service = filmService;
     }
 
     @GetMapping("/films")
@@ -35,8 +35,10 @@ public class FilmController {
     }
 
     @GetMapping("/films/popular")
-    List<Film> findTopFilms(@RequestParam(required = false) int count) {
-        return service.topLikedFilms(count);
+    @ResponseBody
+    List<Film> findTopFilms(@RequestParam(defaultValue = "10") int count) {
+        List<Film> topFilms = service.topLikedFilms(count);
+        return topFilms;
     }
 
     @GetMapping("/films/{id}")
@@ -61,8 +63,8 @@ public class FilmController {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
         if (filmStorage.getFilmById(id) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
-        } else if  {
-
+        } else if (userStorage.getUserById(userId) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         service.removeLike(id, userId);
     }
