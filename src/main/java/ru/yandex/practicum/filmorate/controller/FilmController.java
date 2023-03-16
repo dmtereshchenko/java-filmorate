@@ -1,14 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -19,19 +18,16 @@ import java.util.List;
 public class FilmController {
 
     private final ValidateService validator = new ValidateService();
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
     private final FilmService service;
 
-    public FilmController(FilmStorage filmStorage, UserStorage userStorage, FilmService filmService) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    @Autowired
+    public FilmController(FilmService filmService) {
         this.service = filmService;
     }
 
     @GetMapping("/films")
      List<Film> findAll() {
-        return filmStorage.getFilms();
+        return service.getAllFilms();
     }
 
     @GetMapping("/films/popular")
@@ -43,17 +39,19 @@ public class FilmController {
 
     @GetMapping("/films/{id}")
     Film findFilmById(@PathVariable int id) {
-        if (filmStorage.getFilmById(id) == null) {
+        if (!service.checkFilm(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
-        return filmStorage.getFilmById(id);
+        return service.getFilmFromStorage(id);
     }
 
     @PutMapping("/films/{id}/like/{userId}")
     void likeFilm(@PathVariable int id, @PathVariable int userId, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        if (filmStorage.getFilmById(id) == null) {
+        if (!service.checkFilm(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
+        } else if (!service.checkUser(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         service.addLike(id, userId);
     }
@@ -61,9 +59,9 @@ public class FilmController {
     @DeleteMapping("/films/{id}/like/{userId}")
     void deleteLike(@PathVariable int id, @PathVariable int userId, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        if (filmStorage.getFilmById(id) == null) {
+        if (!service.checkFilm(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
-        } else if (userStorage.getUserById(userId) == null) {
+        } else if (!service.checkUser(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         service.removeLike(id, userId);
@@ -73,19 +71,18 @@ public class FilmController {
     public Film create(@Valid @RequestBody Film film, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
         validator.validateFilm(film);
-        filmStorage.addFilm(film);
+        service.addFilm(film);
         return film;
     }
 
     @PutMapping(value = "/films")
     public Film updateFilm(@RequestBody Film film, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        if (!filmStorage.filmExist(film)) {
+        if (!service.checkFilm(film.getId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
         validator.validateFilm(film);
-        filmStorage.filmExist(film);
-        filmStorage.updateFilm(film);
+        service.updateFilm(film);
         return film;
     }
 }

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,16 +11,18 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class InMemoryFilmStorage implements FilmStorage {
+public class InMemoryFilmStorage implements Storage<Film> {
 
     private final HashMap<Integer, Film> films = new HashMap<>();
     private static int filmId;
 
+    @Override
     public int generateId() {
         return ++filmId;
     }
 
-    public List<Film> getFilms() {
+    @Override
+    public List<Film> getAll() {
         List<Film> allFilms = new ArrayList<>();
         for (int id : films.keySet()) {
             allFilms.add(films.get(id));
@@ -27,23 +30,24 @@ public class InMemoryFilmStorage implements FilmStorage {
         return allFilms;
     }
 
-    public boolean filmExist(Film film) {
-        if (films.containsKey(film.getId())) {
-            return true;
-        }
-        return false;
+    @Override
+    public boolean exist(int id) {
+        return films.containsKey(id);
     }
 
-    public void addFilm(Film film) {
+    @Override
+    public void add(Film film) {
         film.setId(generateId());
         films.put(film.getId(), film);
     }
 
-    public void updateFilm(Film film) {
+    @Override
+    public void update(Film film) {
         films.put(film.getId(), film);
     }
 
-    public Film getFilmById(int id) {
+    @Override
+    public Film getById(int id) {
         return films.get(id);
     }
 }

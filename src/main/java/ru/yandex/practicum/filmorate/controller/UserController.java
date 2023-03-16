@@ -8,7 +8,6 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -19,22 +18,20 @@ import java.util.List;
 public class UserController {
 
     private final ValidateService validator = new ValidateService();
-    private final UserStorage storage;
     private final UserService service;
 
     @Autowired
-    public UserController(UserStorage userStorage, UserService userService) {
-        this.storage = userStorage;
+    public UserController(UserService userService) {
         this.service = userService;
     }
     @GetMapping("/users")
     List<User> findAll() {
-        return storage.getUsers();
+        return service.getAllUsers();
     }
 
     @GetMapping("/users/{id}/friends")
     List<User> friendList(@PathVariable int id) {
-        if (storage.getUserById(id) == null) {
+        if (!service.checkUser(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         return service.returnFriendList(id);
@@ -42,7 +39,7 @@ public class UserController {
 
     @GetMapping("users/{id}/friends/common/{otherId}")
     List<User> commonFriends(@PathVariable int id, @PathVariable int otherId) {
-        if (storage.getUserById(id) == null || storage.getUserById(otherId) == null) {
+        if (!service.checkUser(id) || !service.checkUser(otherId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         return service.findMutualFriends(id, otherId);
@@ -50,16 +47,16 @@ public class UserController {
 
     @GetMapping("users/{id}")
     User findUserById(@PathVariable int id) {
-        if (storage.getUserById(id) == null) {
+        if (!service.checkUser(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
-        return storage.getUserById(id);
+        return service.getUserFromStorage(id);
     }
 
     @PutMapping("users/{id}/friends/{friendId}")
     void addFriend(@PathVariable int id, @PathVariable int friendId, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        if (storage.getUserById(id) == null || storage.getUserById(friendId) == null) {
+        if (!service.checkUser(id) || !service.checkUser(friendId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         service.addFriend(id, friendId);
@@ -68,7 +65,7 @@ public class UserController {
     @DeleteMapping("users/{id}/friends/{friendId}")
     void deleteFriend(@PathVariable int id, @PathVariable int friendId, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        if (storage.getUserById(id) == null || storage.getUserById(friendId) == null) {
+        if (!service.checkUser(id) || !service.checkUser(friendId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         service.deleteFriend(id, friendId);
@@ -78,19 +75,18 @@ public class UserController {
     User create(@Valid @RequestBody User user, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
         validator.validateUser(user);
-        storage.addUser(user);
+        service.addUser(user);
         return user;
     }
 
     @PutMapping(value = "/users")
     User updateUser(@RequestBody User user, HttpServletRequest request) {
-        if (storage.getUserById(user.getId()) == null) {
+        if (!service.checkUser(user.getId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
         validator.validateUser(user);
-        storage.userExist(user);
-        storage.updateUser(user);
+        service.updateUser(user);
         return user;
     }
 }
