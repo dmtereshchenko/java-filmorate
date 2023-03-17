@@ -1,13 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.*;
+import lombok.Data;
+import lombok.NonNull;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-public class Film {
+public class Film implements Comparable<Film> {
 
     private int id;
     @NotBlank
@@ -17,6 +21,7 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private Duration duration;
+    private Set<Integer> userLikes = new HashSet<>();
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
@@ -27,5 +32,24 @@ public class Film {
 
     public int getDuration() {
         return (int) this.duration.toMinutes();
+    }
+
+    public void addLike(int userId) {
+        userLikes.add(userId);
+    }
+
+    public void removeLike(int userId) {
+        userLikes.remove(userId);
+    }
+
+    @Override
+    public int compareTo(Film o) {
+        if (this.userLikes.size() < o.getUserLikes().size()) {
+            return -1;
+        } else if (this.userLikes.size() > o.getUserLikes().size()) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }
