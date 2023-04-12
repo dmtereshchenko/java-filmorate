@@ -22,6 +22,8 @@ public class Film implements Comparable<Film> {
     private LocalDate releaseDate;
     private Duration duration;
     private Set<Integer> userLikes = new HashSet<>();
+    private FilmCategory filmCategory;
+    private String genre;
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;

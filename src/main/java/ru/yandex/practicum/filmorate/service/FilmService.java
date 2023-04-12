@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.User.InMemoryUserService;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.util.List;
@@ -11,12 +12,12 @@ import java.util.List;
 public class FilmService {
 
     private final InMemoryFilmStorage storage;
-    private final UserService userService;
+    private final InMemoryUserService inMemoryUserService;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage storage, UserService userService) {
+    public FilmService(InMemoryFilmStorage storage, InMemoryUserService inMemoryUserService) {
         this.storage = storage;
-        this.userService = userService;
+        this.inMemoryUserService = inMemoryUserService;
     }
 
     public void addLike(int filmId, int userId) {
@@ -44,7 +45,7 @@ public class FilmService {
     }
 
     public boolean checkUser(int id){
-        return userService.checkUser(id);
+        return inMemoryUserService.checkUser(id);
     }
 
     public Film getFilmFromStorage(int id) {

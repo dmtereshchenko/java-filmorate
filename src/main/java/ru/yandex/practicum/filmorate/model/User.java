@@ -23,10 +23,19 @@ public class User {
     @Past
     private LocalDate birthday;
     private Set<Integer> friendList = new HashSet<>();
+    private Set<Integer> friendRequests = new HashSet<>();
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
         this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
+
+    public User(int id, String login, String email, String name, LocalDate birthday) {
+        this.id = id;
+        this.login = login;
+        this.email = email;
         this.name = name;
         this.birthday = birthday;
     }
