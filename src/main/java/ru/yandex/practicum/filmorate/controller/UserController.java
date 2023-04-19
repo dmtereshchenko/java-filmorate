@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.User.InMemoryUserService;
+import ru.yandex.practicum.filmorate.service.DataBase.DBUserService;
+import ru.yandex.practicum.filmorate.service.interfaces.UserService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,11 +19,11 @@ import java.util.List;
 public class UserController {
 
     private final ValidateService validator = new ValidateService();
-    private final InMemoryUserService service;
+    private final UserService service;
 
     @Autowired
-    public UserController(InMemoryUserService inMemoryUserService) {
-        this.service = inMemoryUserService;
+    public UserController(DBUserService dbUserService) {
+        this.service = dbUserService;
     }
     @GetMapping("/users")
     List<User> findAll() {
@@ -71,14 +72,6 @@ public class UserController {
         service.deleteFriend(id, friendId);
     }
 
-    @PostMapping(value = "/users")
-    User create(@Valid @RequestBody User user, HttpServletRequest request) {
-        log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        validator.validateUser(user);
-        service.addUser(user);
-        return user;
-    }
-
     @PutMapping(value = "/users")
     User updateUser(@RequestBody User user, HttpServletRequest request) {
         if (!service.checkUser(user.getId())) {
@@ -87,6 +80,14 @@ public class UserController {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
         validator.validateUser(user);
         service.updateUser(user);
+        return user;
+    }
+
+    @PostMapping(value = "/users")
+    User create(@Valid @RequestBody User user, HttpServletRequest request) {
+        log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
+        validator.validateUser(user);
+        user.setId(service.addUser(user));
         return user;
     }
 }

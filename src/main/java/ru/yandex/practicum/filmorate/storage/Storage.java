@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface Storage<T> {
-    int generateId();
     List<T> getAll();
-    boolean exist(int id);
-    void add(T entity);
+    int add(T entity);
     void update(T entity);
-    T getById(int id);
+    Optional<T> getById(int id);
 }

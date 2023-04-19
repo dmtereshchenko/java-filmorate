@@ -1,9 +1,10 @@
-package ru.yandex.practicum.filmorate.service.User;
+package ru.yandex.practicum.filmorate.service.InMemory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.service.interfaces.UserService;
+import ru.yandex.practicum.filmorate.storage.inmemory.InMemoryUserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,8 +74,9 @@ public class InMemoryUserService implements UserService {
         return storage.getAll();
     }
 
-    public void addUser(User user) {
+    public int addUser(User user) {
         storage.add(user);
+        return storage.generateId();
     }
 
     public void updateUser(User user) {

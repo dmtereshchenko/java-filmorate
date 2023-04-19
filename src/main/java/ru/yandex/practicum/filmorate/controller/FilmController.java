@@ -6,8 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.DataBase.DBFilmService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
+import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -21,8 +22,8 @@ public class FilmController {
     private final FilmService service;
 
     @Autowired
-    public FilmController(FilmService filmService) {
-        this.service = filmService;
+    public FilmController(DBFilmService dbFilmService) {
+        this.service = dbFilmService;
     }
 
     @GetMapping("/films")
@@ -71,7 +72,7 @@ public class FilmController {
     public Film create(@Valid @RequestBody Film film, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
         validator.validateFilm(film);
-        service.addFilm(film);
+        film.setId(service.addFilm(film));
         return film;
     }
 

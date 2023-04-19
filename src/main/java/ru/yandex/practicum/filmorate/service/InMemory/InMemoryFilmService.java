@@ -1,35 +1,38 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.InMemory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.User.InMemoryUserService;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
+import ru.yandex.practicum.filmorate.storage.inmemory.InMemoryFilmStorage;
 
 import java.util.List;
 
 @Service
-public class FilmService {
+public class InMemoryFilmService implements FilmService {
 
     private final InMemoryFilmStorage storage;
     private final InMemoryUserService inMemoryUserService;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage storage, InMemoryUserService inMemoryUserService) {
+    public InMemoryFilmService(InMemoryFilmStorage storage, InMemoryUserService inMemoryUserService) {
         this.storage = storage;
         this.inMemoryUserService = inMemoryUserService;
     }
 
+    @Override
     public void addLike(int filmId, int userId) {
         Film film = storage.getById(filmId);
         film.addLike(userId);
     }
 
+    @Override
     public void removeLike(int filmId, int userId) {
         Film film = storage.getById(filmId);
         film.removeLike(userId);
     }
 
+    @Override
     public List<Film> topLikedFilms(int count) {
             List<Film> allFilms = storage.getAll();
             while (allFilms.size() > count) {
@@ -44,26 +47,33 @@ public class FilmService {
             return allFilms;
     }
 
+    @Override
     public boolean checkUser(int id){
         return inMemoryUserService.checkUser(id);
     }
 
+    @Override
     public Film getFilmFromStorage(int id) {
         return storage.getById(id);
     }
 
+    @Override
     public boolean checkFilm(int id) {
         return storage.exist(id);
     }
 
+    @Override
     public List<Film> getAllFilms() {
         return storage.getAll();
     }
 
-    public void addFilm(Film film) {
+    @Override
+    public int addFilm(Film film) {
         storage.add(film);
+        return storage.generateId();
     }
 
+    @Override
     public void updateFilm(Film film) {
         storage.update(film);
     }

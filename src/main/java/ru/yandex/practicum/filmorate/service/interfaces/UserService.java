@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service.User;
+package ru.yandex.practicum.filmorate.service.interfaces;
 
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -12,7 +12,7 @@ public interface UserService {
     public User getUserFromStorage(int id);
     public boolean checkUser(int id);
     public List<User> getAllUsers();
-    public void addUser(User user);
+    public int addUser(User user);
     public void updateUser(User user);
 }
 
