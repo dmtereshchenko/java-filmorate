@@ -87,6 +87,7 @@ public class FilmController {
         service.updateFilm(film);
         return film;
     }
+
     @GetMapping("/genres")
     List<Genre> findAllGenres() {
         return service.getAllGenres();
