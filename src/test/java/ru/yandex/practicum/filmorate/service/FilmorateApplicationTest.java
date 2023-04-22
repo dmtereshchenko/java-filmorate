@@ -6,19 +6,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.storage.database.*;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.database.FilmDao;
+import ru.yandex.practicum.filmorate.storage.database.FriendshipDao;
+import ru.yandex.practicum.filmorate.storage.database.MpaGenresDao;
+import ru.yandex.practicum.filmorate.storage.database.UserDao;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class FilmoRateApplicationTests {
+public class FilmorateApplicationTest {
     @Autowired
     private final UserDao userDao;
     @Autowired
@@ -66,7 +71,7 @@ class FilmoRateApplicationTests {
 
     @Test
     public void testCreateAndGetFilm() {
-        Film film = new Film("nisi eiusmod", "adipisicing",LocalDate.of(1967, 3, 25), 100,
+        Film film = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100,
                 new Mpa(1, "G"));
         int i = filmDao.add(film);
         film.setId(i);
@@ -79,7 +84,7 @@ class FilmoRateApplicationTests {
 
     @Test
     public void testUpdateFilm() {
-        Film film = new Film("nisi eiusmod", "adipisicing",LocalDate.of(1967, 3, 25), 100,
+        Film film = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100,
                 new Mpa(1, "G"));
         int i = filmDao.add(film);
         film.setId(i);
@@ -92,7 +97,7 @@ class FilmoRateApplicationTests {
 
     @Test
     public void testGetAllFilms() {
-        Film film = new Film("nisi eiusmod", "adipisicing",LocalDate.of(1967, 3, 25), 100,
+        Film film = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100,
                 new Mpa(1, "G"));
         Film film2 = new Film("Film Updated", "New film update description", LocalDate.of(1989, 4, 17),
                 190, new Mpa(2, "PG"));
@@ -113,11 +118,11 @@ class FilmoRateApplicationTests {
         user.setId(userDao.add(user));
         user2.setId(userDao.add(user2));
         friendshipDao.add(user.getId(), user2.getId());
-       List<Integer> userFriends = friendshipDao.getFriendList(user.getId());
-       Assertions.assertThat(userFriends)
-               .isNotNull();
-       Assertions.assertThat(userFriends.get(0))
-               .isEqualTo(user2.getId());
+        List<Integer> userFriends = friendshipDao.getFriendList(user.getId());
+        Assertions.assertThat(userFriends)
+                .isNotNull();
+        Assertions.assertThat(userFriends.get(0))
+                .isEqualTo(user2.getId());
     }
 
     @Test
@@ -182,7 +187,7 @@ class FilmoRateApplicationTests {
 
     @Test
     public void testAddAndGetGenres() {
-        Film film = new Film("nisi eiusmod", "adipisicing",LocalDate.of(1967, 3, 25), 100,
+        Film film = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100,
                 new Mpa(1, "G"));
         Genre genre1 = new Genre(1, "Комедия");
         Genre genre2 = new Genre(2, "Драма");
@@ -203,7 +208,7 @@ class FilmoRateApplicationTests {
 
     @Test
     public void testRemoveGenres() {
-        Film film = new Film("nisi eiusmod", "adipisicing",LocalDate.of(1967, 3, 25), 100,
+        Film film = new Film("nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100,
                 new Mpa(1, "G"));
         Genre genre1 = new Genre(1, "Комедия");
         Genre genre2 = new Genre(2, "Драма");
