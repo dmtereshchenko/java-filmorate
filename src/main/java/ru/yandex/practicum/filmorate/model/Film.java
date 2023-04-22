@@ -37,32 +37,31 @@ public class Film implements Comparable<Film> {
         this.duration = Duration.ofMinutes(duration);
     }
 
-    public Film(int id, String name, String description, LocalDate releaseDate, int duration, int genre, int mpa) {
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = Duration.ofMinutes(duration);
-        if(genre > 0) {
-            this.genres.add(new Genre(genre));
-        }
-        if (mpa > 0) {
-            this.mpa = new Mpa(mpa);
-        }
     }
 
+    public Film(String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = Duration.ofMinutes(duration);
+        this.mpa = mpa;
+    }
 
-
-    public Film(int id, String name, String description, LocalDate releaseDate, int duration, int genre, int categoryId,
-                String categoryName) {
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = Duration.ofMinutes(duration);
-        this.genres.add(new Genre(genre));
-        this.mpa = new Mpa(categoryId, categoryName);
+        this.mpa = mpa;
     }
+
     public int getDuration() {
         return (int) this.duration.toMinutes();
     }
@@ -88,16 +87,20 @@ public class Film implements Comparable<Film> {
 
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();
+        if (getId() != 0) {
+            values.put("film_id", getId());
+        }
         values.put("name", name);
         values.put("description", description);
         values.put("release_date", releaseDate);
         values.put("duration", duration.toMinutes());
-        if (genres.size() > 0) {
-            values.put("genre_id", genres.get(0).getId());
-        }
         if (mpa.getId() > 0) {
             values.put("category_id", mpa.getId());
         }
         return values;
+    }
+
+    public void addGenre(Genre genre) {
+        this.genres.add(genre);
     }
 }

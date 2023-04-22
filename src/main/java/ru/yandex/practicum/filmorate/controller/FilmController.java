@@ -6,9 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.DataBase.DBFilmService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
-import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -19,7 +20,7 @@ import java.util.List;
 public class FilmController {
 
     private final ValidateService validator = new ValidateService();
-    private final FilmService service;
+    private final DBFilmService service;
 
     @Autowired
     public FilmController(DBFilmService dbFilmService) {
@@ -85,5 +86,25 @@ public class FilmController {
         validator.validateFilm(film);
         service.updateFilm(film);
         return film;
+    }
+    @GetMapping("/genres")
+    List<Genre> findAllGenres() {
+        return service.getAllGenres();
+    }
+
+    @GetMapping("/mpa")
+    List<Mpa> findAllCategories() {
+        return service.getAllCategories();
+    }
+
+
+    @GetMapping("/genres/{id}")
+    Genre findGenreById(@PathVariable int id) {
+        return service.getGenre(id);
+    }
+
+    @GetMapping("/mpa/{id}")
+    Mpa findCategoryById(@PathVariable int id) {
+        return service.getCategory(id);
     }
 }
