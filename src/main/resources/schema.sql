@@ -1,4 +1,4 @@
-DROP TABLE films, users, friendship, films_likes, films_and_genres CASCADE;
+DROP TABLE IF EXISTS films, users, friendship, films_likes, films_and_genres CASCADE;
 
 CREATE TABLE IF NOT EXISTS film_category (
 id INTEGER PRIMARY KEY,
