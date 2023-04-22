@@ -24,7 +24,7 @@ public class FilmDao implements Storage<Film> {
     @Override
     public List<Film> getAll() {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select film_id from films");
-        List <Film> allFilms = new ArrayList<>();
+        List<Film> allFilms = new ArrayList<>();
         Set<Integer> allFilmsIds = new TreeSet<>();
         while (filmRows.next()) {
             allFilmsIds.add(filmRows.getInt("film_id"));
@@ -71,7 +71,7 @@ public class FilmDao implements Storage<Film> {
     @Override
     public Optional<Film> getById(int id) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films where film_id = ?", id);
-        if(filmRows.next()) {
+        if (filmRows.next()) {
             Film film = new Film(filmRows.getInt("film_id"), filmRows.getString("name"),
                     filmRows.getString("description"), filmRows.getDate("release_date").toLocalDate(),
                     filmRows.getInt("duration")
