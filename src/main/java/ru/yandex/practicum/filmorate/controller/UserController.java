@@ -25,6 +25,7 @@ public class UserController {
     public UserController(DBUserService dbUserService) {
         this.service = dbUserService;
     }
+
     @GetMapping("/users")
     List<User> findAll() {
         return service.getAllUsers();
