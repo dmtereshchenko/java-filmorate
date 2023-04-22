@@ -48,7 +48,7 @@ public class InMemoryFilmService implements FilmService {
     }
 
     @Override
-    public boolean checkUser(int id){
+    public boolean checkUser(int id) {
         return inMemoryUserService.checkUser(id);
     }
 
