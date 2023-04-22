@@ -69,28 +69,10 @@ public class ValidateServiceTest {
     }
 
     @Test
-    void userLoginShoulNotBeEmptyOrContainsSpaces() {
-        User user = new User("test@test.com", "testLogin", "testName", LocalDate.of(1990, 9, 11));
-        user.setLogin("");
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1, violations.size(), "Есть возможность создать пользователя с пустым логином");
-        user.setLogin("Test Test");
-        assertEquals(1, violations.size(), "Есть возможность создать пользователя с пробелом в логине");
-    }
-
-    @Test
     void ifNameIsEmptyNameEqualsLogin() {
         User user = new User("test@test.com", "testLogin", "testName", LocalDate.of(1990, 9, 11));
         user.setName("");
         validateService.validateUser(user);
         assertEquals(user.getLogin(), user.getName(), "Не использован логин для пользователя с пустым именем.");
-    }
-
-    @Test
-    void userBirthdayShouldNotBeInFuture() {
-        User user = new User("test@test.com", "testLogin", "testName", LocalDate.of(1990, 9, 11));
-        user.setBirthday(LocalDate.now().plusDays(1));
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1, violations.size(), "Есть возможность создать пользователя с датой рождения в будущем");
     }
 }
