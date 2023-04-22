@@ -24,27 +24,27 @@ public class MpaGenresDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    RowMapper<Mpa> ROW_MAPPER_MPA = (ResultSet resultSet, int rowNum) -> {
+    RowMapper<Mpa> mpaRowMapper = (ResultSet resultSet, int rowNum) -> {
         return new Mpa(resultSet.getInt("id"), resultSet.getString("name")) {
         };
     };
 
-    RowMapper<Genre> ROW_MAPPER_GENRE = (ResultSet resultSet, int rowNum) -> {
+    RowMapper<Genre> genreRowMapper = (ResultSet resultSet, int rowNum) -> {
         return new Genre(resultSet.getInt("id"), resultSet.getString("name")) {
         };
     };
 
     public List<Genre> getAllGenres() {
-        return jdbcTemplate.query("select * from film_genre", ROW_MAPPER_GENRE);
+        return jdbcTemplate.query("select * from film_genre", genreRowMapper);
     }
 
     public List<Mpa> getAllCategories() {
-        return jdbcTemplate.query("select * from film_category", ROW_MAPPER_MPA);
+        return jdbcTemplate.query("select * from film_category", mpaRowMapper);
     }
 
     public Optional<Genre> getGenre(int id) {
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from film_genre where id = ?", id);
-        if(genreRows.next()) {
+        if (genreRows.next()) {
             Genre genre = new Genre(
                     genreRows.getInt("id"),
                     genreRows.getString("name")
@@ -57,7 +57,7 @@ public class MpaGenresDao {
 
     public Optional<Mpa> getCategory(int id) {
         SqlRowSet categoryRows = jdbcTemplate.queryForRowSet("select * from film_category where id = ?", id);
-        if(categoryRows.next()) {
+        if (categoryRows.next()) {
             Mpa category = new Mpa(
                     categoryRows.getInt("id"),
                     categoryRows.getString("name")
