@@ -18,7 +18,9 @@ public class DBUserService implements UserService {
     private final FriendshipDao friendshipDao;
 
     @Autowired
-    public DBUserService(UserDao dao, FriendshipDao friendshipDao) {this.dao = dao; this.friendshipDao = friendshipDao;}
+    public DBUserService(UserDao dao, FriendshipDao friendshipDao) {
+        this.dao = dao; this.friendshipDao = friendshipDao;
+    }
 
     @Override
     public void addFriend(int userId, int friendId) {
@@ -76,9 +78,6 @@ public class DBUserService implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        List<User> list = dao.getAll();
-        for (User user : list) {
-        }
         return dao.getAll();
     }
 
