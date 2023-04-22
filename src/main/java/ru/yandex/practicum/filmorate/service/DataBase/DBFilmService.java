@@ -65,7 +65,7 @@ public class DBFilmService implements FilmService {
                 updatedTopFilmsIds.add(i);
             }
             while (updatedTopFilmsIds.size() > count) {
-                updatedTopFilmsIds.remove(count-1);
+                updatedTopFilmsIds.remove(count - 1);
             }
             for (int i : updatedTopFilmsIds) {
                 topFilms.add(getFilmFromStorage(i));
