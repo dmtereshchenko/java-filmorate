@@ -18,7 +18,7 @@ import java.util.Optional;
 public class UserDao implements Storage<User> {
     private final JdbcTemplate jdbcTemplate;
 
-    RowMapper<User> ROW_MAPPER = (ResultSet resultSet, int rowNum) -> {
+    RowMapper<User> rowMapper = (ResultSet resultSet, int rowNum) -> {
         return new User(resultSet.getInt("user_id"), resultSet.getString("login"),
                 resultSet.getString("e_mail"), resultSet.getString("name"),
                 resultSet.getDate("birthday").toLocalDate());
@@ -31,7 +31,7 @@ public class UserDao implements Storage<User> {
     @Override
     public Optional<User> getById(int id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
-        if(userRows.next()) {
+        if (userRows.next()) {
             User user = new User(
                     userRows.getInt("user_id"),
                     userRows.getString("login"),
@@ -68,6 +68,6 @@ public class UserDao implements Storage<User> {
 
     @Override
     public List<User> getAll() {
-        return jdbcTemplate.query("select * from users", ROW_MAPPER);
+        return jdbcTemplate.query("select * from users", rowMapper);
     }
 }
