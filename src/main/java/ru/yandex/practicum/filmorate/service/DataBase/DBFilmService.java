@@ -5,11 +5,11 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
-import ru.yandex.practicum.filmorate.service.interfaces.UserService;
-import ru.yandex.practicum.filmorate.storage.database.FilmDao;
-import ru.yandex.practicum.filmorate.storage.database.LikesDao;
-import ru.yandex.practicum.filmorate.storage.database.MpaGenresDao;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.database.DataBaseFilmStorage;
+import ru.yandex.practicum.filmorate.storage.database.DataBaseLikeStorage;
+import ru.yandex.practicum.filmorate.storage.database.DataBaseMpaAndGenresStorage;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,33 +20,33 @@ import java.util.Set;
 @Service
 public class DBFilmService implements FilmService {
 
-    private final FilmDao dao;
-    private final LikesDao likesDao;
-    private final MpaGenresDao mpaGenresDao;
+    private final DataBaseFilmStorage dao;
+    private final DataBaseLikeStorage dataBaseLikeStorage;
+    private final DataBaseMpaAndGenresStorage dataBaseMpaAndGenresStorage;
     private final UserService userService;
 
-    public DBFilmService(FilmDao dao, LikesDao likesDao, UserService userService, MpaGenresDao mpaGenresDao) {
+    public DBFilmService(DataBaseFilmStorage dao, DataBaseLikeStorage dataBaseLikeStorage, UserService userService, DataBaseMpaAndGenresStorage dataBaseMpaAndGenresStorage) {
         this.dao = dao;
-        this.likesDao = likesDao;
+        this.dataBaseLikeStorage = dataBaseLikeStorage;
         this.userService = userService;
-        this.mpaGenresDao = mpaGenresDao;
+        this.dataBaseMpaAndGenresStorage = dataBaseMpaAndGenresStorage;
     }
 
     @Override
     public void addLike(int filmId, int userId) {
         if (dao.getById(filmId).isPresent() && userService.checkUser(userId)) {
-            likesDao.add(filmId, userId);
+            dataBaseLikeStorage.add(filmId, userId);
         }
     }
 
     @Override
     public void removeLike(int filmId, int userId) {
-        likesDao.remove(filmId, userId);
+        dataBaseLikeStorage.remove(filmId, userId);
     }
 
     @Override
     public List<Film> topLikedFilms(int count) {
-        List<Integer> topFilmsIds = likesDao.getTopLikedIds(count);
+        List<Integer> topFilmsIds = dataBaseLikeStorage.getTopLikedIds(count);
         int size = topFilmsIds.size();
         List<Film> topFilms = new ArrayList<>();
         if (size < count) {
@@ -85,14 +85,13 @@ public class DBFilmService implements FilmService {
 
     @Override
     public Film getFilmFromStorage(int id) {
-            Film film = dao.getById(id).get();
-            Film film1 = setFilmGenres(film);
-            return film1;
+        Film film = dao.getById(id).get();
+        return setFilmGenres(film);
     }
 
     @Override
     public boolean checkFilm(int id) {
-        return dao.getById(id).isPresent();
+        return dao.exists(id);
     }
 
     @Override
@@ -112,52 +111,48 @@ public class DBFilmService implements FilmService {
         int id = dao.add(film);
         film.setId(id);
         if (film.getGenres().size() > 0) {
-            mpaGenresDao.addGenres(film);
+            dataBaseMpaAndGenresStorage.addGenres(film);
         }
         return id;
     }
 
     @Override
     public void updateFilm(Film film) {
-        mpaGenresDao.removeGenres(film.getId());
+        dataBaseMpaAndGenresStorage.removeGenres(film.getId());
         if (film.getGenres().size() > 0) {
-            mpaGenresDao.addGenres(film);
+            dataBaseMpaAndGenresStorage.addGenres(film);
         }
         dao.update(film);
     }
 
     public List<Genre> getAllGenres() {
-        return mpaGenresDao.getAllGenres();
+        return dataBaseMpaAndGenresStorage.getAllGenres();
     }
 
     public List<Mpa> getAllCategories() {
-        return mpaGenresDao.getAllCategories();
+        return dataBaseMpaAndGenresStorage.getAllCategories();
     }
 
     public Genre getGenre(int id) {
-        if (mpaGenresDao.getGenre(id).isPresent()) {
-            return mpaGenresDao.getGenre(id).get();
+        if (dataBaseMpaAndGenresStorage.getGenre(id).isPresent()) {
+            return dataBaseMpaAndGenresStorage.getGenre(id).get();
         } else {
             return null;
         }
     }
 
     public Mpa getCategory(int id) {
-        if (mpaGenresDao.getCategory(id).isPresent()) {
-            return mpaGenresDao.getCategory(id).get();
+        if (dataBaseMpaAndGenresStorage.getCategory(id).isPresent()) {
+            return dataBaseMpaAndGenresStorage.getCategory(id).get();
         } else {
             return null;
         }
     }
 
     private Film setFilmGenres(Film film) {
-        List<Integer> genresIdList = mpaGenresDao.getGenresByFilmId(film.getId());
-        if (genresIdList.size() > 0) {
-            for (int i : genresIdList) {
-                if (mpaGenresDao.getGenre(i).isPresent()) {
-                    film.addGenre(mpaGenresDao.getGenre(i).get());
-                }
-            }
+        Set<Genre> genres = dataBaseMpaAndGenresStorage.getGenresByFilmId(film.getId());
+        if (genres.size() > 0) {
+            film.setGenres(genres);
         }
         return film;
     }

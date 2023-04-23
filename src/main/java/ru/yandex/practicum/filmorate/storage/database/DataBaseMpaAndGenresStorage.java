@@ -12,27 +12,28 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Component
 @Slf4j
-public class MpaGenresDao {
+public class DataBaseMpaAndGenresStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public MpaGenresDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     RowMapper<Mpa> mpaRowMapper = (ResultSet resultSet, int rowNum) -> {
         return new Mpa(resultSet.getInt("id"), resultSet.getString("name")) {
         };
     };
-
     RowMapper<Genre> genreRowMapper = (ResultSet resultSet, int rowNum) -> {
         return new Genre(resultSet.getInt("id"), resultSet.getString("name")) {
         };
     };
+
+    public DataBaseMpaAndGenresStorage(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     public List<Genre> getAllGenres() {
         return jdbcTemplate.query("select * from film_genre", genreRowMapper);
@@ -69,38 +70,44 @@ public class MpaGenresDao {
     }
 
     public void addGenres(Film film) {
-        Set<Genre> genresList = new HashSet<>();
-        genresList.addAll(film.getGenres());
+        Set<Genre> genresList = film.getGenres();
         String sqlQuery = "insert into films_and_genres (film_id, genre_id) values(?, ?) on conflict do nothing";
         for (Genre genre : genresList) {
             jdbcTemplate.update(sqlQuery, film.getId(), genre.getId());
         }
-        List<Integer> genresIds = getGenresByFilmId(film.getId());
-        List<Genre> genres = new ArrayList<>();
-        for (int i : genresIds) {
-            genres.add(getGenre(i).get());
-        }
-        film.setGenres(genres);
+        film.setGenres(getGenresByFilmId(film.getId()));
     }
 
     public void removeGenres(int id) {
-        SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select id from films_and_genres where film_id = ?", id);
+        String sqlQuery = "delete from films_and_genres where film_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
+    }
+
+    public Set<Genre> getGenresByFilmId(int id) {
+        SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select fag.genre_id, fg.name from films_and_genres fag " +
+                "left join film_genre fg on fag.genre_id = fg.id where film_id = ? order by genre_id", id);
+        Set<Genre> genres = new HashSet<>();
         while (genresRows.next()) {
-            String sqlQuery = "delete from films_and_genres where id = ?";
-            jdbcTemplate.update(sqlQuery, genresRows.getInt("id"));
+            genres.add(new Genre(genresRows.getInt("genre_id"), genresRows.getString("name")));
+        }
+        return genres;
+    }
+
+    public boolean genreExists(int id) {
+        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select exists(select id from film_genre where id = ?) as exist", id);
+        if (genreRows.next()) {
+            return genreRows.getBoolean("exist");
+        } else {
+            return false;
         }
     }
 
-    public List<Integer> getGenresByFilmId(int id) {
-        SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select genre_id from films_and_genres where film_id = ?", id);
-        Set<Integer> genresIds = new HashSet<>();
-        List<Integer> genres = new ArrayList<>();
-        while (genresRows.next()) {
-            genresIds.add(genresRows.getInt("genre_id"));
+    public boolean categoryExists(int id) {
+        SqlRowSet categoryRows = jdbcTemplate.queryForRowSet("select exists(select id from film_category where id = ?) as exist", id);
+        if (categoryRows.next()) {
+            return categoryRows.getBoolean("exist");
+        } else {
+            return false;
         }
-        for (int i : genresIds) {
-            genres.add(i);
-        }
-        return genres;
     }
 }

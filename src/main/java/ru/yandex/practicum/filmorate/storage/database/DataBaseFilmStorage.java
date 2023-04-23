@@ -6,31 +6,47 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @Slf4j
-public class FilmDao implements Storage<Film> {
+public class DataBaseFilmStorage implements Storage<Film> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDao(JdbcTemplate jdbcTemplate) {
+    public DataBaseFilmStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public List<Film> getAll() {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select film_id from films");
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select f.film_id, f.name, f.description, f.release_date, " +
+                "f.duration, f.category_id, fc.name as category_name, fag.genre_id, fg.name as genre_name from films as f " +
+                "left join film_category as fc on f.category_id = fc.id left join films_and_genres fag on f.film_id = fag.film_id " +
+                "left join film_genre fg on fag.genre_id = fg.id ");
         List<Film> allFilms = new ArrayList<>();
-        Set<Integer> allFilmsIds = new TreeSet<>();
+        int id = 0;
+        Film film = new Film();
         while (filmRows.next()) {
-            allFilmsIds.add(filmRows.getInt("film_id"));
-        }
-        for (int i : allFilmsIds) {
-            allFilms.add(getById(i).get());
+            if (filmRows.getInt("film_id") == id) {
+                film.addGenre(new Genre(filmRows.getInt("genre_id"), filmRows.getString("genre_name")));
+            } else {
+                film = new Film(filmRows.getInt("film_id"), filmRows.getString("name"),
+                        filmRows.getString("description"), filmRows.getDate("release_date").toLocalDate(),
+                        filmRows.getInt("duration"), new Mpa(filmRows.getInt("category_id"),
+                        filmRows.getString("category_name")));
+                if (filmRows.getInt("genre_id") > 0) {
+                    film.addGenre(new Genre(filmRows.getInt("genre_id"), filmRows.getString("genre_name")));
+                }
+                id = film.getId();
+                allFilms.add(film);
+            }
         }
         return allFilms;
     }
@@ -70,27 +86,29 @@ public class FilmDao implements Storage<Film> {
 
     @Override
     public Optional<Film> getById(int id) {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from films where film_id = ?", id);
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select f.film_id, f.name, f.description, f.release_date, " +
+                "f.duration, f.category_id, fc.name as category_name from films as f left join film_category as fc on f.category_id = fc.id " +
+                "where film_id = ?", id);
         if (filmRows.next()) {
             Film film = new Film(filmRows.getInt("film_id"), filmRows.getString("name"),
                     filmRows.getString("description"), filmRows.getDate("release_date").toLocalDate(),
-                    filmRows.getInt("duration")
-            );
-            SqlRowSet mpaIdRows = jdbcTemplate.queryForRowSet("select category_id from films where film_id = ?", id);
-            if (mpaIdRows.next()) {
-                int mpaId = mpaIdRows.getInt("category_id");
-                if (mpaId > 0) {
-                    SqlRowSet mpaNameRows = jdbcTemplate.queryForRowSet("select name from film_category where id = ?", mpaId);
-                    if (mpaNameRows.next()) {
-                        film.setMpa(new Mpa(mpaId, mpaNameRows.getString("name")));
-                    }
-                }
-            }
+                    filmRows.getInt("duration"), new Mpa(filmRows.getInt("category_id"),
+                    filmRows.getString("category_name")));
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
             log.info("Фильм с идентификатором {} не найден.", id);
             return Optional.empty();
+        }
+    }
+
+    @Override
+    public boolean exists(int id) {
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select exists(select film_id from films where film_id = ?) as exist", id);
+        if (filmRows.next()) {
+            return filmRows.getBoolean("exist");
+        } else {
+            return false;
         }
     }
 }

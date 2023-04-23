@@ -9,7 +9,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Data
 public class Film implements Comparable<Film> {
@@ -27,7 +30,7 @@ public class Film implements Comparable<Film> {
     private Mpa mpa = new Mpa();
 
     @JsonProperty("genres")
-    private List<Genre> genres = new ArrayList<>();
+    private Set<Genre> genres = new HashSet<>();
 
     @JsonCreator
     public Film(String name, String description, LocalDate releaseDate, int duration) {
@@ -60,6 +63,9 @@ public class Film implements Comparable<Film> {
         this.releaseDate = releaseDate;
         this.duration = Duration.ofMinutes(duration);
         this.mpa = mpa;
+    }
+
+    public Film() {
     }
 
     public int getDuration() {

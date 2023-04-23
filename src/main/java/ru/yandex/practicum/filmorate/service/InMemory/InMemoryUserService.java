@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service.InMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.interfaces.UserService;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.inmemory.InMemoryUserStorage;
 
 import java.util.ArrayList;

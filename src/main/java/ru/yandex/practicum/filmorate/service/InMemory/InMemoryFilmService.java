@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service.InMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.inmemory.InMemoryFilmStorage;
 
 import java.util.List;

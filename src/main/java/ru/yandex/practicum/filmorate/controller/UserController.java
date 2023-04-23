@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.DataBase.DBUserService;
-import ru.yandex.practicum.filmorate.service.interfaces.UserService;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -79,7 +79,7 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        validator.validateUser(user);
+        ValidateService.validateUser(user);
         service.updateUser(user);
         return user;
     }
@@ -87,7 +87,7 @@ public class UserController {
     @PostMapping(value = "/users")
     User create(@Valid @RequestBody User user, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        validator.validateUser(user);
+        ValidateService.validateUser(user);
         user.setId(service.addUser(user));
         return user;
     }

@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class LikesDao {
+public class DataBaseLikeStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public LikesDao(JdbcTemplate jdbcTemplate) {
+    public DataBaseLikeStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

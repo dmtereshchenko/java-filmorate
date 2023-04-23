@@ -12,4 +12,6 @@ public interface Storage<T> {
     void update(T entity);
 
     Optional<T> getById(int id);
+
+    boolean exists(int id);
 }

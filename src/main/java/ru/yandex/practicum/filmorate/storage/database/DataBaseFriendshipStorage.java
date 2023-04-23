@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class FriendshipDao {
+public class DataBaseFriendshipStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public FriendshipDao(JdbcTemplate jdbcTemplate) {
+    public DataBaseFriendshipStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

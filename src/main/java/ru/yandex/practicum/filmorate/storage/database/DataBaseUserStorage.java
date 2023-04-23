@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class UserDao implements Storage<User> {
+public class DataBaseUserStorage implements Storage<User> {
     private final JdbcTemplate jdbcTemplate;
 
     RowMapper<User> rowMapper = (ResultSet resultSet, int rowNum) -> {
@@ -24,7 +24,7 @@ public class UserDao implements Storage<User> {
                 resultSet.getDate("birthday").toLocalDate());
     };
 
-    public UserDao(JdbcTemplate jdbcTemplate) {
+    public DataBaseUserStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -69,5 +69,15 @@ public class UserDao implements Storage<User> {
     @Override
     public List<User> getAll() {
         return jdbcTemplate.query("select * from users", rowMapper);
+    }
+
+    @Override
+    public boolean exists(int id) {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select exists(select user_id from users where user_id = ?) as exist", id);
+        if (userRows.next()) {
+            return userRows.getBoolean("exist");
+        } else {
+            return false;
+        }
     }
 }
