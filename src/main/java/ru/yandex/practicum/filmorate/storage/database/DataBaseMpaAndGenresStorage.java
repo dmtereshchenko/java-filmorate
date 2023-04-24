@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.database;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -11,11 +12,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.sql.SQLException;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -70,11 +70,23 @@ public class DataBaseMpaAndGenresStorage {
     }
 
     public void addGenres(Film film) {
-        Set<Genre> genresList = film.getGenres();
-        String sqlQuery = "insert into films_and_genres (film_id, genre_id) values(?, ?) on conflict do nothing";
-        for (Genre genre : genresList) {
-            jdbcTemplate.update(sqlQuery, film.getId(), genre.getId());
+        List<Genre> genresList = new ArrayList<>();
+        for (Genre genre : film.getGenres()) {
+            genresList.add(genre);
         }
+        jdbcTemplate.batchUpdate("insert into films_and_genres (film_id, genre_id) values(?, ?) on conflict do nothing",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setInt(1, film.getId());
+                        ps.setInt(2, genresList.get(i).getId());
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return genresList.size();
+                    }
+                });
         film.setGenres(getGenresByFilmId(film.getId()));
     }
 
@@ -84,8 +96,10 @@ public class DataBaseMpaAndGenresStorage {
     }
 
     public Set<Genre> getGenresByFilmId(int id) {
-        SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select fag.genre_id, fg.name from films_and_genres fag " +
-                "left join film_genre fg on fag.genre_id = fg.id where film_id = ? order by genre_id", id);
+        SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select fag.genre_id, fg.name " +
+                "from films_and_genres fag " +
+                "left join film_genre fg on fag.genre_id = fg.id " +
+                "where film_id = ? order by genre_id", id);
         Set<Genre> genres = new HashSet<>();
         while (genresRows.next()) {
             genres.add(new Genre(genresRows.getInt("genre_id"), genresRows.getString("name")));

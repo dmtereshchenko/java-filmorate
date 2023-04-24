@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,5 +80,22 @@ public class DataBaseUserStorage implements Storage<User> {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public List<User> getSomeById(List<Integer> ids) {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users");
+        List<User> users = new ArrayList<>();
+        while (userRows.next()) {
+            for (int i : ids) {
+                if (userRows.getInt("user_id") == i) {
+                    User user = new User(userRows.getInt("user_id"), userRows.getString("login"),
+                            userRows.getString("e_mail"), userRows.getString("name"),
+                            userRows.getDate("birthday").toLocalDate());
+                    users.add(user);
+                }
+            }
+        }
+        return users;
     }
 }

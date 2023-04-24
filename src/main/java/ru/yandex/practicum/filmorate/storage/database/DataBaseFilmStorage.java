@@ -28,7 +28,8 @@ public class DataBaseFilmStorage implements Storage<Film> {
     public List<Film> getAll() {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select f.film_id, f.name, f.description, f.release_date, " +
                 "f.duration, f.category_id, fc.name as category_name, fag.genre_id, fg.name as genre_name from films as f " +
-                "left join film_category as fc on f.category_id = fc.id left join films_and_genres fag on f.film_id = fag.film_id " +
+                "left join film_category as fc on f.category_id = fc.id " +
+                "left join films_and_genres fag on f.film_id = fag.film_id " +
                 "left join film_genre fg on fag.genre_id = fg.id ");
         List<Film> allFilms = new ArrayList<>();
         int id = 0;
@@ -61,27 +62,15 @@ public class DataBaseFilmStorage implements Storage<Film> {
 
     @Override
     public void update(Film film) {
-        if (Optional.of(film.getMpa().getId()).isPresent()) {
-            String sqlQuery = "update films set name = ?, description = ?, release_date = ?, duration = ?, " +
-                    "category_id = ? where film_id = ?";
-            jdbcTemplate.update(sqlQuery,
-                    film.getName(),
-                    film.getDescription(),
-                    film.getReleaseDate(),
-                    film.getDuration(),
-                    film.getMpa().getId(),
-                    film.getId());
-        } else {
-            String sqlQuery = "update films set name = ?, description = ?, release_date = ?, duration = ?, " +
-                    "category_id = ? where film_id = ?";
-            jdbcTemplate.update(sqlQuery,
-                    film.getName(),
-                    film.getDescription(),
-                    film.getReleaseDate(),
-                    film.getDuration(),
-                    null,
-                    film.getId());
-        }
+        String sqlQuery = "update films set name = ?, description = ?, release_date = ?, duration = ?, " +
+                "category_id = ? where film_id = ?";
+        jdbcTemplate.update(sqlQuery,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpa() != null ? film.getMpa().getId() : null,
+                film.getId());
     }
 
     @Override
@@ -110,5 +99,35 @@ public class DataBaseFilmStorage implements Storage<Film> {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public List<Film> getSomeById(List<Integer> filmIds) {
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select f.film_id, f.name, f.description, f.release_date, " +
+                "f.duration, f.category_id, fc.name as category_name, fag.genre_id, fg.name as genre_name from films as f " +
+                "left join film_category as fc on f.category_id = fc.id " +
+                "left join films_and_genres fag on f.film_id = fag.film_id " +
+                "left join film_genre fg on fag.genre_id = fg.id order by film_id");
+        Film film = new Film();
+        List<Film> topFilms = new ArrayList<>();
+        while (filmRows.next()) {
+            if (filmRows.getInt("film_id") == film.getId()) {
+                film.addGenre(new Genre(filmRows.getInt("genre_id"), filmRows.getString("genre_name")));
+            } else {
+                for (int i : filmIds) {
+                    if (filmRows.getInt("film_id") == i) {
+                        film = new Film(filmRows.getInt("film_id"), filmRows.getString("name"),
+                                filmRows.getString("description"), filmRows.getDate("release_date").toLocalDate(),
+                                filmRows.getInt("duration"), new Mpa(filmRows.getInt("category_id"),
+                                filmRows.getString("category_name")));
+                        if (filmRows.getInt("genre_id") > 0) {
+                            film.addGenre(new Genre(filmRows.getInt("genre_id"), filmRows.getString("genre_name")));
+                        }
+                        topFilms.add(film);
+                    }
+                }
+            }
+        }
+        return topFilms;
     }
 }

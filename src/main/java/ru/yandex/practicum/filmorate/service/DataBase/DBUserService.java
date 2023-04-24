@@ -9,9 +9,7 @@ import ru.yandex.practicum.filmorate.storage.database.DataBaseFriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.database.DataBaseUserStorage;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Primary
 @Service
@@ -52,27 +50,13 @@ public class DBUserService implements UserService {
 
     @Override
     public List<User> findMutualFriends(int userId, int friendId) {
-        List<Integer> user1Friends = dataBaseFriendshipStorage.getFriendList(userId);
-        Set<Integer> user1Set = new HashSet<>(user1Friends);
-        List<Integer> user2Friends = dataBaseFriendshipStorage.getFriendList(friendId);
-        Set<Integer> user2Set = new HashSet<>(user2Friends);
-        List<User> mutualFriends = new ArrayList<>();
-        for (int i : user1Set) {
-            if (user2Set.contains(i)) {
-                mutualFriends.add(dao.getById(i).get());
-            }
-        }
-        return mutualFriends;
-
+        List<Integer> mutualFriendsIds = dataBaseFriendshipStorage.getMutualFriendIds(userId, friendId);
+        return dao.getSomeById(mutualFriendsIds);
     }
 
     @Override
     public User getUserFromStorage(int id) {
-        if (dao.exists(id)) {
-            return dao.getById(id).get();
-        } else {
-            return null;
-        }
+        return dao.getById(id).get();
     }
 
     @Override

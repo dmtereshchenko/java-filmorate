@@ -52,4 +52,15 @@ public class DataBaseFriendshipStorage {
         }
         return friendList;
     }
+
+    public List<Integer> getMutualFriendIds(int user1Id, int user2Id) {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select count(friend_id) as friends, friend_id from friendship " +
+                "where user_id in (?, ?) group by friend_id " +
+                "having friends = 2", user1Id, user2Id);
+        List<Integer> mutualFriendsIds = new ArrayList<>();
+        while (userRows.next()) {
+            mutualFriendsIds.add(userRows.getInt("friend_id"));
+        }
+        return mutualFriendsIds;
+    }
 }

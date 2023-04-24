@@ -48,7 +48,6 @@ public class DBFilmService implements FilmService {
     public List<Film> topLikedFilms(int count) {
         List<Integer> topFilmsIds = dataBaseLikeStorage.getTopLikedIds(count);
         int size = topFilmsIds.size();
-        List<Film> topFilms = new ArrayList<>();
         if (size < count) {
             Set<Integer> topFilmsIdsSet = new HashSet<>();
             if (size > 0) {
@@ -67,15 +66,10 @@ public class DBFilmService implements FilmService {
             while (updatedTopFilmsIds.size() > count) {
                 updatedTopFilmsIds.remove(count - 1);
             }
-            for (int i : updatedTopFilmsIds) {
-                topFilms.add(getFilmFromStorage(i));
-            }
+            return dao.getSomeById(updatedTopFilmsIds);
         } else {
-            for (int i : topFilmsIds) {
-                topFilms.add(getFilmFromStorage(i));
-            }
+            return dao.getSomeById(topFilmsIds);
         }
-        return topFilms;
     }
 
     @Override

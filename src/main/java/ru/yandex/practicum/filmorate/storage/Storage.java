@@ -14,4 +14,6 @@ public interface Storage<T> {
     Optional<T> getById(int id);
 
     boolean exists(int id);
+
+    List<T> getSomeById(List<Integer> ids);
 }
