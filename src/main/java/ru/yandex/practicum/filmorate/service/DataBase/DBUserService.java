@@ -51,7 +51,12 @@ public class DBUserService implements UserService {
     @Override
     public List<User> findMutualFriends(int userId, int friendId) {
         List<Integer> mutualFriendsIds = dataBaseFriendshipStorage.getMutualFriendIds(userId, friendId);
-        return dao.getSomeById(mutualFriendsIds);
+        if (mutualFriendsIds.size() > 0) {
+            return dao.getSomeById(mutualFriendsIds);
+        } else {
+            List<User> emptyList = new ArrayList<>();
+            return emptyList;
+        }
     }
 
     @Override

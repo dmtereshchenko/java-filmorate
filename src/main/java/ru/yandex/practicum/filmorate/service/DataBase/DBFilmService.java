@@ -79,8 +79,7 @@ public class DBFilmService implements FilmService {
 
     @Override
     public Film getFilmFromStorage(int id) {
-        Film film = dao.getById(id).get();
-        return setFilmGenres(film);
+        return dao.getById(id).get();
     }
 
     @Override
@@ -90,14 +89,7 @@ public class DBFilmService implements FilmService {
 
     @Override
     public List<Film> getAllFilms() {
-        List<Film> allFilms = dao.getAll();
-        List<Film> allFilmsWithGenres = new ArrayList<>();
-        if (allFilms.size() > 0) {
-            for (Film film : allFilms) {
-                allFilmsWithGenres.add(setFilmGenres(film));
-            }
-        }
-        return allFilmsWithGenres;
+        return dao.getAll();
     }
 
     @Override
@@ -141,13 +133,5 @@ public class DBFilmService implements FilmService {
         } else {
             return null;
         }
-    }
-
-    private Film setFilmGenres(Film film) {
-        Set<Genre> genres = dataBaseMpaAndGenresStorage.getGenresByFilmId(film.getId());
-        if (genres.size() > 0) {
-            film.setGenres(genres);
-        }
-        return film;
     }
 }

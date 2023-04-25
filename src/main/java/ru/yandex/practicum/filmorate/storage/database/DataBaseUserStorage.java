@@ -3,6 +3,9 @@ package ru.yandex.practicum.filmorate.storage.database;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -84,17 +87,15 @@ public class DataBaseUserStorage implements Storage<User> {
 
     @Override
     public List<User> getSomeById(List<Integer> ids) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users");
+        SqlParameterSource parameters = new MapSqlParameterSource("ids", ids);
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        SqlRowSet userRows = namedParameterJdbcTemplate.queryForRowSet("select * from users where user_id in (:ids)", parameters);
         List<User> users = new ArrayList<>();
         while (userRows.next()) {
-            for (int i : ids) {
-                if (userRows.getInt("user_id") == i) {
-                    User user = new User(userRows.getInt("user_id"), userRows.getString("login"),
-                            userRows.getString("e_mail"), userRows.getString("name"),
-                            userRows.getDate("birthday").toLocalDate());
-                    users.add(user);
-                }
-            }
+            User user = new User(userRows.getInt("user_id"), userRows.getString("login"),
+                    userRows.getString("e_mail"), userRows.getString("name"),
+                    userRows.getDate("birthday").toLocalDate());
+            users.add(user);
         }
         return users;
     }

@@ -32,7 +32,8 @@ public class DataBaseLikeStorage {
     }
 
     public List<Integer> getTopLikedIds(int count) {
-        SqlRowSet likesRows = jdbcTemplate.queryForRowSet("select count(user_id), film_id from films_likes group by film_id limit ?", count);
+        SqlRowSet likesRows = jdbcTemplate.queryForRowSet("select count(user_id) as likes, film_id from films_likes " +
+                "group by film_id order by likes desc limit ?", count);
         List<Integer> filmIds = new ArrayList<>();
         while (likesRows.next()) {
             filmIds.add(likesRows.getInt("film_id"));
