@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.DataBase.DBUserService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 
@@ -21,9 +22,10 @@ public class UserController {
     private final UserService service;
 
     @Autowired
-    public UserController(UserService userService) {
-        this.service = userService;
+    public UserController(DBUserService dbUserService) {
+        this.service = dbUserService;
     }
+
     @GetMapping("/users")
     List<User> findAll() {
         return service.getAllUsers();
@@ -71,22 +73,22 @@ public class UserController {
         service.deleteFriend(id, friendId);
     }
 
-    @PostMapping(value = "/users")
-    User create(@Valid @RequestBody User user, HttpServletRequest request) {
-        log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        validator.validateUser(user);
-        service.addUser(user);
-        return user;
-    }
-
     @PutMapping(value = "/users")
     User updateUser(@RequestBody User user, HttpServletRequest request) {
         if (!service.checkUser(user.getId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        validator.validateUser(user);
+        ValidateService.validateUser(user);
         service.updateUser(user);
+        return user;
+    }
+
+    @PostMapping(value = "/users")
+    User create(@Valid @RequestBody User user, HttpServletRequest request) {
+        log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
+        ValidateService.validateUser(user);
+        user.setId(service.addUser(user));
         return user;
     }
 }

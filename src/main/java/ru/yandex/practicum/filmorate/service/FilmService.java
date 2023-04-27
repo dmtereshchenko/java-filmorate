@@ -1,69 +1,26 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.util.List;
 
-@Service
-public class FilmService {
+public interface FilmService {
 
-    private final InMemoryFilmStorage storage;
-    private final UserService userService;
+    void addLike(int filmId, int userId);
 
-    @Autowired
-    public FilmService(InMemoryFilmStorage storage, UserService userService) {
-        this.storage = storage;
-        this.userService = userService;
-    }
+    void removeLike(int filmId, int userId);
 
-    public void addLike(int filmId, int userId) {
-        Film film = storage.getById(filmId);
-        film.addLike(userId);
-    }
+    List<Film> topLikedFilms(int count);
 
-    public void removeLike(int filmId, int userId) {
-        Film film = storage.getById(filmId);
-        film.removeLike(userId);
-    }
+    boolean checkUser(int id);
 
-    public List<Film> topLikedFilms(int count) {
-            List<Film> allFilms = storage.getAll();
-            while (allFilms.size() > count) {
-                Film lowestLiked = null;
-                for (Film film : allFilms) {
-                    if (null == lowestLiked || film.compareTo(lowestLiked) < 0) {
-                        lowestLiked = film;
-                    }
-                    allFilms.remove(lowestLiked);
-                }
-            }
-            return allFilms;
-    }
+    Film getFilmFromStorage(int id);
 
-    public boolean checkUser(int id){
-        return userService.checkUser(id);
-    }
+    boolean checkFilm(int id);
 
-    public Film getFilmFromStorage(int id) {
-        return storage.getById(id);
-    }
+    List<Film> getAllFilms();
 
-    public boolean checkFilm(int id) {
-        return storage.exist(id);
-    }
+    int addFilm(Film film);
 
-    public List<Film> getAllFilms() {
-        return storage.getAll();
-    }
-
-    public void addFilm(Film film) {
-        storage.add(film);
-    }
-
-    public void updateFilm(Film film) {
-        storage.update(film);
-    }
+    void updateFilm(Film film);
 }

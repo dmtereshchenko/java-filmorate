@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.DataBase.DBFilmService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,15 +18,15 @@ import java.util.List;
 public class FilmController {
 
     private final ValidateService validator = new ValidateService();
-    private final FilmService service;
+    private final DBFilmService service;
 
     @Autowired
-    public FilmController(FilmService filmService) {
-        this.service = filmService;
+    public FilmController(DBFilmService dbFilmService) {
+        this.service = dbFilmService;
     }
 
     @GetMapping("/films")
-     List<Film> findAll() {
+    List<Film> findAll() {
         return service.getAllFilms();
     }
 
@@ -70,8 +70,8 @@ public class FilmController {
     @PostMapping(value = "/films")
     public Film create(@Valid @RequestBody Film film, HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: {}, Строка параметров запроса: {}", request.getRequestURI(), request.getQueryString());
-        validator.validateFilm(film);
-        service.addFilm(film);
+        ValidateService.validateFilm(film);
+        film.setId(service.addFilm(film));
         return film;
     }
 
@@ -81,7 +81,7 @@ public class FilmController {
         if (!service.checkFilm(film.getId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
-        validator.validateFilm(film);
+        ValidateService.validateFilm(film);
         service.updateFilm(film);
         return film;
     }
